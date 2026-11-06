@@ -1,0 +1,71 @@
+{
+  "name": "dsh-anthropic-oauth",
+  "version": "0.1.0",
+  "description": "A polished personal Claude Pro/Max OAuth experience for DeepSeek Harness",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-model-selection",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "platform": "web"
+    }
+  },
+  "files": [
+    "lib",
+    "bin",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "DESIGN.md",
+    "NOTICE.md",
+    "docs",
+    "LICENSE",
+    "assets"
+  ],
+  "bin": {
+    "anthropic-oauth-login": "bin/claude-oauth-login.mjs"
+  },
+  "scripts": {
+    "check": "node --check lib/index.js && node --check lib/client.js && node --check bin/claude-oauth-login.mjs",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "claude",
+    "anthropic",
+    "oauth",
+    "gmail-login",
+    "google-oauth",
+    "llm",
+    "quota-tracking"
+  ],
+  "author": "Frank Zhang (personal fork, derived from grloper/dsh-claude-oauth)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drewliu123/dsh-anthropic-oauth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/drewliu123/dsh-anthropic-oauth/issues"
+  },
+  "homepage": "https://github.com/drewliu123/dsh-anthropic-oauth#readme"
+}

@@ -1,0 +1,5 @@
+# dsh-anthropic-oauth bundle patch
+# Inserts the Claude OAuth provider into DeepSeek Harness.
+- insert:
+    - id: anthropic-oauth-provider
+      name: dsh-anthropic-oauth
