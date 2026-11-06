@@ -116,10 +116,8 @@ npm start
 
 Open `http://127.0.0.1:3191`. For example, `?theme=light&lang=en&scenario=error` shows a light English error state. See the [validation guide](docs/validation.md) for other scenarios and coverage.
 
-## Attribution and license
+## License
 
-Derived from [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0 under MIT. This project replaces the Settings and composer UI and adds explicit account adoption, DSH-only disconnection, and model controls on top of the original bridge. Quota presentation also draws inspiration from [dsh-codex](https://github.com/Yan-Zero/dsh-codex).
+Released under the [MIT License](LICENSE).
 
-This is an unofficial, experimental integration using Claude's consumer OAuth flow and Claude Code-compatible headers. Use it with an account and use case permitted by the provider; compatibility depends on upstream changes. The live path passed in the environment above, while other account plans and DSH releases have not been exhaustively tested.
-
-[MIT License](LICENSE) · [Attribution](NOTICE.md) · [Design notes](DESIGN.md)
+[Acknowledgments](NOTICE.md) · [Design notes](DESIGN.md)

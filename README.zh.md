@@ -116,10 +116,8 @@ npm start
 
 打开 `http://127.0.0.1:3191`。例如 `?theme=light&lang=en&scenario=error` 可查看浅色英文错误场景。更多场景和覆盖范围见 [测试说明](docs/validation.md)。
 
-## 来源与许可
+## 许可证
 
-本项目基于 [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0（MIT）派生，在原有桥接能力上重做设置页与对话额度界面，并增加明确的账户接管、DSH 独立断开和模型管理。额度交互也参考了 [dsh-codex](https://github.com/Yan-Zero/dsh-codex)。
+本项目采用 [MIT 许可证](LICENSE) 开源。
 
-这是非官方、实验性集成，使用 Claude 消费者 OAuth 流程和兼容 Claude Code 的请求 Header。请使用供应商允许的账户与用途；兼容性受上游变化影响。真实链路已在上述环境通过，其他订阅类型和 DSH 版本尚未逐一测试。
-
-[MIT 许可证](LICENSE) · [来源与署名](NOTICE.md) · [设计说明](DESIGN.md)
+[致谢](NOTICE.md) · [设计说明](DESIGN.md)
