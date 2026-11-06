@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — 2026-11-06
+
+- Fixed cancellation/disconnection against the real DSH credential service: reference removal uses `unset()`. Regression fixtures now match that API and cover failed cleanup plus retry.
+- Unified browser and host OAuth deadlines around a server-reported fifteen-minute validity window. Expired attempts direct users to start a new sign-in and close the old authorization tab.
+- Verified an isolated Web installation, Settings registration, and navigation to the real Claude OAuth consent page. Live token exchange, refresh, and DSH inference are recorded separately as they are exercised.
+
 ## 0.1.1 — 2026-11-06
 
 ### Authentication

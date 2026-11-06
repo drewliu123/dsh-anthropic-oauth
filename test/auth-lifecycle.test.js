@@ -23,6 +23,7 @@ async function fixture(run) {
     stored, credentialFile, connectionFile,
     network: async () => Response.json({}),
     set: async (key, value) => { stored.set(key, value) },
+    unset: async key => { stored.delete(key) },
     async call(route, method = 'POST') {
       const response = { statusCode: 0, body: '', headers: {}, setHeader(k, v) { this.headers[k] = v }, end(body = '') { this.body = body } }
       await routes.get(`/api/dsh-anthropic-oauth/${route}`)({ method, headers: { accept: 'application/json' }, url: `/api/dsh-anthropic-oauth/${route}` }, response)
@@ -47,7 +48,7 @@ async function fixture(run) {
   apply({
     get(name) {
       if (name === 'webServer') return { register(route) { routes.set(route.path, route.handler); return () => {} } }
-      if (name === 'credentials') return { set: (key, value) => f.set(key, value), delete: async key => { stored.delete(key) } }
+      if (name === 'credentials') return { set: (key, value) => f.set(key, value), unset: key => f.unset(key) }
       if (name === 'settings') return { get: () => ({}), update: async () => {} }
     },
     effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose) },
@@ -176,6 +177,30 @@ test('logout waits for an in-flight credential write and removes both refs after
   assert.equal(f.stored.size, 0)
   assert.equal((await f.call('status', 'GET')).authenticated, false)
   assert.equal(fs.existsSync(f.connectionFile), false)
+}))
+
+test('cancel clears absent credential references using the real unset API', async () => fixture(async f => {
+  const cleared = []
+  f.unset = async key => { cleared.push(key); f.stored.delete(key) }
+  const result = await f.call('cancel')
+  assert.equal(result.ok, true)
+  assert.deepEqual(cleared.sort(), ['ANTHROPIC_OAUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN'])
+  assert.equal(fs.existsSync(f.credentialFile), false)
+}))
+
+test('credential cleanup failure is reported and a retry can clear both refs', async () => fixture(async f => {
+  f.stored.set('ANTHROPIC_OAUTH_TOKEN', SECRET)
+  f.stored.set('CLAUDE_CODE_OAUTH_TOKEN', SECRET)
+  const cleared = []
+  f.unset = async key => { cleared.push(key); if (key === 'ANTHROPIC_OAUTH_TOKEN') throw new Error(SECRET); f.stored.delete(key) }
+  const failed = await f.call('cancel')
+  assert.equal(failed.status, 500)
+  assert.equal(failed.ok, false)
+  assert.ok(!JSON.stringify(failed).includes(SECRET))
+  assert.equal(cleared.length, 2)
+  f.unset = async key => { f.stored.delete(key) }
+  assert.equal((await f.call('cancel')).ok, true)
+  assert.equal(f.stored.size, 0)
 }))
 
 test('disconnect during adoption refresh prevents late shared-file and DSH writes', async () => fixture(async f => {

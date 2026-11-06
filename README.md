@@ -47,6 +47,8 @@ Open the local URL printed by DSH, then go to **Settings → dsh-anthropic-oauth
 2. Choose which discovered models DSH offers. Use **Make default** if available, or choose an enabled Claude model in the conversation picker.
 3. Open a conversation with a Claude model selected to see the quota meter. Change its placement in the plugin's Settings page.
 
+Each sign-in has a fifteen-minute window, shown in the waiting banner. If it expires, close the old consent tab and click **Sign in** again; an old consent page cannot revive a closed callback.
+
 **Use Claude Code login** appears when a local login is detected and the plugin is disconnected. It is used only after you choose it. In the isolated setup above, your usual Claude Code credentials are intentionally outside the selected directory.
 
 ### Add to an existing DSH setup
@@ -79,6 +81,8 @@ The bundled `anthropic-oauth-login` CLI honors the same directory overrides and 
 | --- | --- |
 | Plugin missing from Settings | Confirm the home/profile matches the running DSH process, then restart it to rebuild the client bundle. |
 | Sign-in tab did not open | Use the waiting banner's sign-in link. The callback must reach the machine running DSH. |
+| Sign-in expired / callback refused the connection | Close the old consent tab and start a fresh sign-in in Settings. |
+| Claude's Authorize button stays disabled | Complete any human verification on Claude's page. A loaded consent page alone does not mean authorization succeeded. |
 | Models are missing | Use **Sync account**. Discovery failure leaves existing provider settings unchanged; the plugin does not invent model IDs. |
 | No composer meter | Select a Claude model and check that placement is not **Hidden**. No usage data may have been read yet. |
 | No **Make default** button | Your DSH build does not expose the default-model service. Select the model through DSH's picker. |

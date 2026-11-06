@@ -26,8 +26,12 @@ test('login endpoint starts the OAuth flow and returns a valid Claude authorizat
     plugin.apply(ctx)
 
     const json = await call('/api/dsh-anthropic-oauth/login', { accept: 'application/json' })
-    const { ok, authUrl } = JSON.parse(json.body)
+    const { ok, authUrl, expiresAt } = JSON.parse(json.body)
     assert.strictEqual(ok, true)
+    assert.ok(expiresAt > Date.now() + 14 * 60 * 1000)
+    assert.ok(expiresAt <= Date.now() + 15 * 60 * 1000)
+    const sameFlow = await call('/api/dsh-anthropic-oauth/login', { accept: 'application/json' })
+    assert.strictEqual(JSON.parse(sameFlow.body).expiresAt, expiresAt)
     const url = new URL(authUrl)
     assert.strictEqual(url.origin + url.pathname, 'https://claude.ai/oauth/authorize')
     assert.strictEqual(url.searchParams.get('client_id'), '9d1c250a-e61b-44d9-88ed-5944d1962f5e')

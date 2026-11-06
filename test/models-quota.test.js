@@ -93,7 +93,7 @@ test('host serves models, persists enable/disable and default, and reads quota w
   let defaultMode = 'ok'
   const services = {
     webServer: { register: (route) => { routes.set(route.path, route.handler); return () => {} } },
-    credentials: { set: async () => {}, delete: async () => {} },
+    credentials: { set: async () => {}, unset: async () => {} },
     settings: { get: () => ({ providers: { anthropic: provider } }), update: async (ns, patch) => {
       provider = structuredClone(patch.providers.anthropic)
       updates.push(provider?.models.map((m) => m.id))

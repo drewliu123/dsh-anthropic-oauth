@@ -1,6 +1,6 @@
 {
   "name": "dsh-anthropic-oauth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A polished personal Claude Pro/Max OAuth experience for DeepSeek Harness",
   "type": "module",
   "main": "lib/index.js",
