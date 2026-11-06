@@ -34,7 +34,7 @@ The browser layer is replaced with a new dsh-anthropic-oauth surface.
 - OAuth and token exchange stay on the Host side.
 - The plugin does not mirror tokens into a third-party subscriptions store.
 - OAuth scopes remain `user:profile user:inference` by default.
-- The plugin shares the official Claude Code credential file so an existing session can be reused, but only after explicit adoption (`connection.json` under `DSH_HOME`). Nothing is read, refreshed or sent before that.
+- The plugin detects an existing Claude Code credential file to offer adoption. It refreshes or synchronizes that login only after explicit adoption (`connection.json` under `DSH_HOME`) or a new plugin sign-in.
 - The credentials directory and `DSH_HOME` are overridable (`DSH_ANTHROPIC_OAUTH_CLAUDE_DIR`, `CLAUDE_CONFIG_DIR`, `DSH_HOME`) so tests never touch real accounts.
 - Disconnect removes only the DSH-side connection and credential refs; the Claude Code CLI file is never deleted.
 - Quota is read from a free, read-only usage endpoint when it works (`normalizeUsage` rejects anything that is not the expected shape); otherwise a minimal real request reads rate-limit headers, **only on an explicit refresh**, cached for 5 minutes.
@@ -51,7 +51,8 @@ The browser layer is replaced with a new dsh-anthropic-oauth surface.
 
 - A real OAuth login is not part of automated tests.
 - The plugin uses the upstream provider's private/consumer OAuth and Claude Code-compatible request headers. Users should confirm that their account and use case are permitted by the provider's current terms.
-- The host bridge still writes the shared Claude credential file synchronously; follow-up hardening can add atomic writes and single-flight refresh.
+- The host bridge writes the shared Claude credential file synchronously with owner-only permissions. Atomic replacement and cross-process locking remain follow-up work; concurrent refreshes within one plugin instance share a single request.
 - The current provider model list is refreshed through the baseline host code; pagination and richer capability preservation remain follow-up work.
 - The free usage endpoint's response shape is **unverified** (a bogus-token probe cannot tell whether a path exists, since authentication is checked first). If it does not match, the plugin falls back as described above.
-- Overlapping refreshes (timer, file watcher, sync) are still not single-flighted on the host.
+- Cancel and disconnect invalidate pending work and abort provider requests. DSH credential mutations are queued so disconnection deletes references after an already running write settles. This does not revoke provider tokens or coordinate other processes sharing the Claude credential file.
+- Authentication changes trigger a fresh composer quota read and discard the prior account's cached UI reading.

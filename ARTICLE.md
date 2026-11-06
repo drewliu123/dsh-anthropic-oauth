@@ -1,5 +1,7 @@
 # Supercharging DeepSeek Harness: Bringing Claude Pro/Max with One-Click Google/Gmail OAuth Login and Real-Time Quota Tracking
 
+> Historical upstream article, retained for attribution. Installation commands, screenshots, feature claims, and verification status describe the upstream project and may be outdated. For this derivative, use the [current README](README.md).
+
 *By **grloper** ([GitHub @grloper](https://github.com/grloper))*
 
 ---

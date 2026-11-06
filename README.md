@@ -1,98 +1,119 @@
 # dsh-anthropic-oauth
 
-[中文说明](README.zh.md) · [Upstream attribution](NOTICE.md)
+**Claude sign-in, model selection, and quota visibility inside DeepSeek Harness.**
 
-Experimental personal plugin. Live OAuth completion, token refresh, and inference still need end-to-end verification; see the validation notes below.
+[中文说明](README.zh.md) · [Changelog](CHANGELOG.md) · [Preview & testing](docs/validation.md) · [Report an issue](https://github.com/drewliu123/dsh-anthropic-oauth/issues)
 
-A personal Claude Pro/Max OAuth plugin for DeepSeek Harness. It keeps the reference plugin's host-side OAuth, token refresh, model discovery, and quota integration, while replacing the browser surface with a calmer, more native-feeling Studio UI.
+[![CI](https://github.com/drewliu123/dsh-anthropic-oauth/actions/workflows/ci.yml/badge.svg)](https://github.com/drewliu123/dsh-anthropic-oauth/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-This project is derived from [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) under its MIT license. The client presentation layer and local UX changes in this directory are original.
+Connect a Claude Pro/Max account from DSH Settings, choose the models that appear in your picker, and see remaining allowance beside your conversation. You can also explicitly adopt an existing local Claude Code login.
 
-![Settings preview using synthetic account and quota data](assets/screens/iteration-light-final.png)
+![Claude account, quota windows, and model settings](assets/screens/iteration-light-final.png)
 
-*UI preview with simulated data; this image does not demonstrate a live account connection.*
+*Actual plugin components with simulated account and usage data. Experimental: a complete live OAuth → refresh → inference session and the live usage response format still need end-to-end verification.*
 
-## Latest QA iteration
+## What you get
 
-See [the 2026-11-01 QA report](docs/qa-iteration-2026-11-01.md) for failure regressions, narrow/light/English browser checks, screenshots and reproducible synthetic UI preview instructions. Current-default models cannot be disabled until a replacement is selected. Model write failures roll back where supported and are surfaced instead of appearing successful. Quota failures no longer become healthy or zero-usage readings.
+- **Account management in Settings.** Browser OAuth with PKCE, a manual sign-in link when popups are blocked, account sync, cancellation, and DSH-only disconnection.
+- **A useful model picker.** Models come from your account, grouped by Opus / Sonnet / Haiku. Search, enable or disable models, and choose a default when your DSH build supports it. The current default and last enabled model are protected.
+- **Quota where you work.** A small composer meter, a dock above the input, or no composer display. Details show each usage window and reset time; the meter follows the primary window with the lowest remaining percentage.
+- **Chinese and English UI.** Light and dark themes, responsive settings, and explicit loading, empty, and error states.
 
-## What is different
+## Quick start
 
-- A focused **dsh-anthropic-oauth** settings page instead of a dense settings dashboard.
-- Clear connected, waiting, error, and disconnected states.
-- **Quota** (structure borrowed from [dsh-codex](https://github.com/Yan-Zero/dsh-codex)): a compact meter in the composer showing the primary window with the lowest remaining percentage, coloured in four steps by remaining capacity (≥60% green, ≥40% yellow, ≥20% orange, below red); hover for both windows and their reset countdowns, click for details and refresh. The Settings card shows each window with its exact reset time, marks the primary window with the lowest remaining percentage, and says where the numbers came from. Quota can also sit in a slim dock above the composer, or be hidden.
-- **Model selection**: models grouped by Opus / Sonnet / Haiku, searchable, with a switch per model to choose which ones DSH offers in its model picker (at least one always stays on), and *Make default* through DSH's own default-model service.
-- Responsive cards with dark/light theme tokens; labels follow the page language (Chinese/English).
-- OAuth values are stored on the Host side; normal account status omits credentials. Upstream error text is not comprehensively sanitized yet, so review it before sharing diagnostics.
-- The plugin no longer mirrors credentials into a third-party subscriptions store.
-- **Opt-in**: an existing Claude Code login on the machine is detected but never used until you choose **Use Claude Code login** (or sign in through the plugin).
-- **Disconnect only affects DSH.** It does not delete or change the Claude Code CLI's own credential file (the upstream plugin logged the CLI out too).
-- If model discovery fails, provider settings are left unchanged instead of being filled with invented models.
+### Requirements
 
-## Install locally
+Use **Node.js 24 LTS**, `pnpm` on your `PATH`, and a DSH build with Web UI plugin support. The plugin code supports Node 20+, but the DSH CLI has newer runtime requirements. A Claude Pro/Max account is needed for the subscription login path.
 
-Use an isolated DSH profile while evaluating the plugin. The plugin reads and writes under `DSH_HOME` and the Claude credentials directory, so set **both** to keep a test away from your real accounts:
+The commands pin DSH to `0.2.1-rc.5`, whose CLI syntax and bundle registration were checked against the installed distribution. They use a separate DSH home **and** Claude credential directory. Run them in the same terminal; they do not require a global DSH installation.
 
 ```bash
 git clone https://github.com/drewliu123/dsh-anthropic-oauth.git
-export DSH_HOME="$PWD/.dsh-anthropic-oauth-test"
-export DSH_ANTHROPIC_OAUTH_CLAUDE_DIR="$DSH_HOME/claude-home"   # CLAUDE_CONFIG_DIR is also honored
-npx -p @deepseek-ai/dsh dsh plugin --profile web add ./dsh-anthropic-oauth
-npx -p @deepseek-ai/dsh dsh --profile web --port 3187 --no-open
+cd dsh-anthropic-oauth
+
+export DSH_HOME="$PWD/.dsh-dev"
+export DSH_ANTHROPIC_OAUTH_CLAUDE_DIR="$DSH_HOME/claude-home"
+
+npx -y -p @deepseek-ai/dsh@0.2.1-rc.5 dsh plugin --profile web add "$PWD"
+npx -y -p @deepseek-ai/dsh@0.2.1-rc.5 dsh --profile web --port 3187 --no-open
 ```
 
-Always set `DSH_HOME` before any `dsh` command, including `--help`; without it `dsh` targets `~/.dsh`.
+Open the local URL printed by DSH, then go to **Settings → dsh-anthropic-oauth**. The bundle registers itself; no manual YAML patch is needed.
 
-## Login flow
+### Connect and choose a model
 
-1. Open **dsh-anthropic-oauth** in DSH Settings.
-2. Either click **Sign in** (Claude/Google authorization in a browser tab), or **Use Claude Code login** if one was detected.
-3. Return to DSH; the page polls the Host and updates automatically.
-4. Click **Sync account** if the model list needs a manual refresh.
+1. Click **Sign in**, finish authorization on Claude's page, and return to DSH. If a tab did not open, use the fallback link in the waiting banner.
+2. Choose which discovered models DSH offers. Use **Make default** if available, or choose an enabled Claude model in the conversation picker.
+3. Open a conversation with a Claude model selected to see the quota meter. Change its placement in the plugin's Settings page.
 
-No password is collected by this plugin. OAuth is handled by Claude's authorization page and the Host callback. The token is not rendered in the browser UI.
+**Use Claude Code login** appears when a local login is detected and the plugin is disconnected. It is used only after you choose it. In the isolated setup above, your usual Claude Code credentials are intentionally outside the selected directory.
 
-## Quota: where the numbers come from
+### Add to an existing DSH setup
 
-Two sources, tried in this order; the UI always says which one it used:
+For a CLI-managed Web instance, run the `plugin … add` command with the **same `DSH_HOME` and profile that instance uses**, then restart it. Replace `web` if your profile has another name. The desktop app's `desktop` profile is reserved and cannot be managed by this ordinary npm CLI command; use the desktop app's supported plugin-management path instead. The quick start above creates a separate Web instance.
 
-1. **Read-only usage endpoint** (`/api/oauth/usage`): costs no quota, so it refreshes automatically (every 60 s while a Claude model is active). **Its response shape is an assumption** — the plugin expects `five_hour` / `seven_day` windows with `utilization` as a percentage and an ISO `resets_at`. I could not verify it without a real login; anything that does not match is rejected, never displayed, and the endpoint is not asked again for 30 minutes.
-2. **One minimal real request** (`max_tokens: 1`) reading rate-limit response headers — the method inherited from the upstream plugin. This **spends a little quota**, so it runs **only when you press refresh**, never automatically. Until then the meter shows an empty bar ("not read yet").
+For an existing Claude Code session, leave `DSH_ANTHROPIC_OAUTH_CLAUDE_DIR` unset, or point it at the intended Claude directory. `CLAUDE_CONFIG_DIR` is the fallback override; otherwise the plugin uses `~/.claude`.
 
-If you see a source label of "from one minimal request" in Settings, source 1 did not work on your account; please check the numbers against Claude's own usage page.
+## How quota works
 
-## Models
+The plugin tries a read-only usage endpoint first. It does not send a model inference request for automatic refreshes. Unexpected or malformed data produces an unavailable/retry state rather than a made-up zero-usage reading.
 
-*Enable* a model to offer it in DSH's picker; the choice is stored in `prefs.json` under `DSH_HOME/dsh-anthropic-oauth/` and applied by rewriting `providers.anthropic.models` in the profile (the only fields written are the ones DSH's provider schema knows). *Make default* calls DSH's `agentDefaultModel` service; if your DSH build does not have it, the button is hidden.
+If the read-only endpoint is unavailable, an **explicit manual probe** can send one `max_tokens: 1` request and read the returned rate-limit headers. That consumes a small amount of allowance. The UI labels the source, and caches probe results for five minutes.
 
-## Verified so far
+The meter appears only for an active Claude conversation. Other model-specific windows, when returned by the provider, remain visible in Settings but do not determine the primary meter's color.
 
-- Plugin loads in an isolated `web` profile; the client bundle is served to the page.
-- Status/quota/adopt/disconnect endpoints behave as described, including: no request is made while disconnected, adopt is `POST`-only, and disconnect leaves the Claude credentials file byte-identical.
-- The Settings page renders in a real browser (screenshots in `assets/screens/`).
-- **Clicking Sign in opens Claude's authorization page**: verified in a real browser — a new tab opens at `claude.ai/oauth/authorize` (PKCE `S256`, loopback `redirect_uri`), Claude shows its own sign-in page, and the plugin page switches to "waiting for browser" with a manual fallback link and a Cancel button that restores the idle state. A host test covers the login endpoint and the callback server.
-- Both token endpoints (`claude.ai` and `platform.claude.com`) answer a bogus code with a normal OAuth `invalid_grant`, so the post-authorization exchange path is reachable.
-- **Quota and model UI, in a real browser** (screenshots in `assets/screens/`, **using mock API data**): composer meter with colour step, hover tooltip and popover; dock in an active conversation; "hidden"; the "not read yet" state; Settings quota cards; model grid with per-model switches, the last-enabled lock, *Enable all* and *Make default*.
-- Host behaviour, against a fake network and fake DSH services: models are listed and enabled/disabled, persisted and applied; invalid choices are refused; default goes through the service; the free quota source makes no inference request; with it unavailable, automatic reads spend nothing and only an explicit refresh probes.
-- **Not verified:** completing a real sign-in (no account credentials were entered), real token refresh, model requests through the DSH inference path, **the usage endpoint's real response shape**, the error banner in the composer popover, and a live DSH locale-switch workflow. Light/narrow layouts and English component labels were subsequently checked with mocked data; see the QA report.
+## Connection and credentials
 
-## Checks
+OAuth exchange and refresh run on the DSH host. Account status contains display information, not token values. Credentials are synchronized to DSH's credential service; this derivative does not copy them into a third-party subscriptions store.
+
+- **Cancel** ends the pending plugin authorization. Start a fresh sign-in to try again.
+- **Disconnect** removes the DSH connection and its credential references, and stops pending plugin authorization. It leaves Claude Code's credential file intact.
+- Signing in or refreshing may update the selected shared Claude credential file. Set both directory overrides when testing against a separate account.
+
+The bundled `anthropic-oauth-login` CLI honors the same directory overrides and writes secret files with owner-only permissions. The Settings flow is the recommended entry point.
+
+## Troubleshooting
+
+| What you see | What to check |
+| --- | --- |
+| Plugin missing from Settings | Confirm the home/profile matches the running DSH process, then restart it to rebuild the client bundle. |
+| Sign-in tab did not open | Use the waiting banner's sign-in link. The callback must reach the machine running DSH. |
+| Models are missing | Use **Sync account**. Discovery failure leaves existing provider settings unchanged; the plugin does not invent model IDs. |
+| No composer meter | Select a Claude model and check that placement is not **Hidden**. No usage data may have been read yet. |
+| No **Make default** button | Your DSH build does not expose the default-model service. Select the model through DSH's picker. |
+| Quota needs a manual read | Retry the read-only source, or use the explicitly labelled probe if you accept its small allowance cost. |
+
+For an issue report, include your DSH/Node versions, profile name, what you clicked, and a redacted screenshot or error. Do not include credential files or authorization URLs.
+
+## Develop and verify
+
+There are no root runtime dependencies to install:
 
 ```bash
 npm run check
 npm test
+npm pack --dry-run
 ```
 
-Tests cover metadata, PKCE helpers, request headers, scopes, HTML escaping, the login endpoint and callback server, the browser module and its slots, the pure quota/model logic, and the host's model/quota routes. A real OAuth login is intentionally not performed in automated tests.
+Tests cover the host bridge, credential isolation, OAuth callbacks, model preferences, quota parsing, and client registration using temporary stores and mocked provider responses. They do not log into a real account.
 
-## Known leftovers
+To run the actual UI with synthetic data:
 
-- Cancel currently dismisses the client waiting state without aborting the Host OAuth flow. Disconnect also does not abort pending authorization; completing an already opened authorization tab can reconnect the plugin. Close that tab and let the pending flow expire before relying on disconnection.
-- Some upstream errors are returned verbatim to the local browser. Comprehensive error redaction and concurrent authentication/write serialization remain follow-up work.
+```bash
+cd dev/preview
+npm ci
+npm start
+```
 
-- A test profile that ran an *older* build can still contain invented models (`claude-opus-5`, …) in its `cordis.patch.yml`; current code never writes them but does not remove old ones.
-- The composer quota UI only appears while a Claude model is selected in that conversation.
+Open `http://127.0.0.1:3191`. For example, `?theme=light&lang=en&scenario=error` opens a light English error state. See [validation notes](docs/validation.md) for scenarios and coverage.
 
-## License
+To update a local checkout, run `git pull --ff-only`, repeat the add command for the intended home/profile if needed, and restart DSH.
 
-MIT. See [LICENSE](LICENSE) and the upstream attribution above.
+## Scope and attribution
+
+This is an unofficial, experimental integration, derived from [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0. It uses Claude's consumer OAuth flow and Claude Code-compatible headers; compatibility depends on upstream changes. Use it with an account and use case permitted by the provider. Live account verification remains the main outstanding validation task.
+
+The replacement Settings/composer UI, explicit account adoption, DSH-only disconnect, model controls, and quota presentation build on that bridge. The quota presentation also takes inspiration from [dsh-codex](https://github.com/Yan-Zero/dsh-codex).
+
+[MIT License](LICENSE) · [Attribution](NOTICE.md) · [Design notes](DESIGN.md)
