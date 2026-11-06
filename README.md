@@ -11,7 +11,9 @@ Connect a Claude Pro/Max account from DSH Settings, choose the models that appea
 
 ![Claude account, quota windows, and model settings](assets/screens/iteration-light-final.png)
 
-*Actual plugin components with simulated account and usage data. Experimental: a complete live OAuth → refresh → inference session and the live usage response format still need end-to-end verification.*
+*The UI preview above uses simulated account and usage data.*
+
+**Live verified on 2026-11-06:** version `0.1.2` completed real OAuth login, token refresh, and inference through DSH `0.2.1-rc.5`. Claude Haiku 5.5 returned the expected test response; the read-only usage source also returned valid quota windows. See the [live verification record](docs/live-verification-2026-11-06.md).
 
 ## What you get
 
@@ -116,7 +118,7 @@ To update a local checkout, run `git pull --ff-only`, repeat the add command for
 
 ## Scope and attribution
 
-This is an unofficial, experimental integration, derived from [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0. It uses Claude's consumer OAuth flow and Claude Code-compatible headers; compatibility depends on upstream changes. Use it with an account and use case permitted by the provider. Live account verification remains the main outstanding validation task.
+This is an unofficial, experimental integration, derived from [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0. It uses Claude's consumer OAuth flow and Claude Code-compatible headers; compatibility depends on upstream changes. Use it with an account and use case permitted by the provider. Real-account login, refresh, inference, and usage reading passed in the documented environment; other account plans and DSH versions have not been exhaustively tested.
 
 The replacement Settings/composer UI, explicit account adoption, DSH-only disconnect, model controls, and quota presentation build on that bridge. The quota presentation also takes inspiration from [dsh-codex](https://github.com/Yan-Zero/dsh-codex).
 

@@ -11,7 +11,9 @@
 
 ![账户、额度窗口与模型设置界面](assets/screens/iteration-light-final.png)
 
-*截图使用实际插件组件和模拟账户数据。当前为实验性项目：真实账户的完整登录、刷新、推理链路，以及只读额度接口的真实格式，仍待端到端验证。*
+*上方界面预览使用实际插件组件和模拟账户数据。*
+
+**已通过真实账号验证（2026-11-06）：** `0.1.2` 版本已跑通真实 OAuth 登录、Token 刷新与 DSH `0.2.1-rc.5` 内推理链路。Claude Haiku 5.5 返回了预期测试文本，只读 usage 接口也成功返回额度窗口。详见 [真实验证记录](docs/live-verification-2026-11-06.md)。
 
 ## 能做什么
 
@@ -116,7 +118,7 @@ npm start
 
 ## 项目来源与边界
 
-本项目基于 [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0 派生，是非官方、实验性的个人插件。它使用 Claude 消费者 OAuth 流程和兼容 Claude Code 的请求 Header，兼容性受上游变化影响；请使用供应商允许的账户和用途。当前最主要的验证缺口是真实账号完整链路。
+本项目基于 [grloper/dsh-claude-oauth](https://github.com/grloper/dsh-claude-oauth) v1.1.0 派生，是非官方、实验性的个人插件。它使用 Claude 消费者 OAuth 流程和兼容 Claude Code 的请求 Header，兼容性受上游变化影响；请使用供应商允许的账户和用途。真实登录、刷新、推理与额度读取已在上述环境通过；其他订阅类型和 DSH 版本尚未逐一测试。
 
 在原有桥接能力上，本项目重做了设置页与对话额度界面，增加明确的账户接管、DSH 独立断开、模型管理和额度展示。额度交互也参考了 [dsh-codex](https://github.com/Yan-Zero/dsh-codex)。
 

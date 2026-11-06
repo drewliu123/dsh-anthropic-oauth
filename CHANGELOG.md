@@ -4,7 +4,7 @@
 
 - Fixed cancellation/disconnection against the real DSH credential service: reference removal uses `unset()`. Regression fixtures now match that API and cover failed cleanup plus retry.
 - Unified browser and host OAuth deadlines around a server-reported fifteen-minute validity window. Expired attempts direct users to start a new sign-in and close the old authorization tab.
-- Verified an isolated Web installation, Settings registration, and navigation to the real Claude OAuth consent page. Live token exchange, refresh, and DSH inference are recorded separately as they are exercised.
+- Verified a real-account OAuth login, token refresh, and DSH inference with Claude Haiku 5.5 on DSH 0.2.1-rc.5. The read-only usage source also returned valid quota windows. See the [live verification record](docs/live-verification-2026-11-06.md).
 
 ## 0.1.1 — 2026-11-06
 

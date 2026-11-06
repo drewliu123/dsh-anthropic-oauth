@@ -2,6 +2,8 @@
 
 This page separates reproducible local checks from live account verification. The project README is the installation guide; older dated QA reports preserve the context of previous iterations.
 
+**Current status: real-account OAuth login, refresh, DSH inference, and read-only usage retrieval passed on 2026-11-06 with version 0.1.2.** See the [live verification record](live-verification-2026-11-06.md) for the environment and observations.
+
 ## Automated checks
 
 Run from the cloned repository root:
@@ -60,7 +62,7 @@ A narrow viewport should preserve readable cards with no horizontal page overflo
 - After restarting with the correction, the same real cancel endpoint returned HTTP 200 with `ok: true`.
 - The waiting banner now displays the host's sign-in expiration time. The host and client use the same fifteen-minute window.
 - Syntax checks and all 45 local automated tests passed, including server deadline and cleanup-failure regressions.
-- A new real consent page reached the signed-in account, but its Authorize control stayed disabled while hCaptcha frames were loaded. User interaction on the provider page is still required; no real token exchange or inference has been claimed from this state.
+- Initially, a new real consent page reached the signed-in account, but its Authorize control stayed disabled while hCaptcha frames were loaded. The user subsequently completed authorization; the passing real token-exchange and inference results are in the live record linked above.
 
 ## Evidence and boundaries
 
@@ -70,4 +72,4 @@ DSH `0.2.1-rc.5` was installed into a separate home and Web profile on 2026-11-0
 
 That run exposed a real integration issue hidden by the original mocks: DSH's reference cleanup API is `unset()`, while the plugin called `delete()`. Cancel returned HTTP 500. Also, the old client stopped waiting before the host deadline; the consent page could remain open after its loopback callback listener closed. Version 0.1.2 corrects the API and shares a server-reported sign-in deadline. Merely reaching the consent page does not establish token exchange or inference.
 
-Still to verify with a real permitted account: OAuth completion, refresh against the provider, inference through DSH, and the read-only usage endpoint's actual payload. A component preview cannot establish these. Remote/headless hosts also need a working route for the browser's loopback callback.
+OAuth completion, refresh against the provider, inference through DSH, and this account's read-only usage payload are now verified by the separate real-account run. The component preview alone was not used as evidence for them. Additional account types, DSH versions, and remote/headless deployment remain outside that run; remote hosts also need a working route for the browser's loopback callback.
